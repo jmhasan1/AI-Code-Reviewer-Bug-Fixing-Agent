@@ -1,6 +1,7 @@
 import ast
 from pathlib import Path
 
+from app.ingestion.base import LanguageParser
 from app.ingestion.models import ArtifactType, CodeArtifact
 
 
@@ -199,3 +200,21 @@ def _build_method_artifacts(
         )
 
     return artifacts
+
+class PythonParser(LanguageParser):
+    """Parser for Python source files."""
+
+    language = "python"
+
+    def parse_file(
+        self,
+        file_path: Path,
+        repository_id: str,
+        repository_root: Path,
+    ) -> list[CodeArtifact]:
+        """Parse a Python source file."""
+        return parse_python_file(
+            file_path=file_path,
+            repository_id=repository_id,
+            repository_root=repository_root,
+        )
