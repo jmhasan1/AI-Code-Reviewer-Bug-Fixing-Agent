@@ -1,17 +1,77 @@
 # AI Code Reviewer & Bug-Fixing Agent
 
-An agentic AI system for reviewing software repositories, identifying bugs and code-quality issues, proposing fixes, and validating changes through automated testing.
+An agentic AI system for understanding software repositories, identifying bugs and code-quality issues, proposing targeted fixes, and validating those changes through automated testing.
+
+The project is being developed incrementally, beginning with deterministic **repository intelligence** before introducing semantic retrieval and agentic LLM workflows.
 
 ## Project Status
 
 🚧 **Active development**
 
-This project is being developed as a practical Generative AI engineering project and Build Sprint MVP.
+### Current Milestone
+
+**Milestone 2 — Repository Intelligence: Complete**
+
+Implemented:
+
+- Repository inspection
+- Recursive source-file scanning
+- Language detection
+- Python AST parsing
+- Structured code artifacts
+- Language parser abstraction
+- Parser registry
+- Unified repository parsing pipeline
+- Symbol indexing
+- Code relationship extraction
+
+Current test status:
+
+```text
+11 tests passing
+Ruff checks passing
+```
+
+The current implementation is intentionally deterministic and does not yet require an LLM or vector database.
+
+---
+
+## Current Capabilities
+
+The repository-ingestion and code-intelligence layer can currently:
+
+1. Inspect a repository
+2. Discover supported source files
+3. Ignore irrelevant directories
+4. Detect source languages
+5. Parse Python source using the built-in AST
+6. Extract modules, classes, functions, and methods
+7. Preserve source locations and metadata
+8. Build an exact symbol index
+9. Extract structural code relationships
+
+### Current Python Relationship Types
+
+```text
+IMPORTS
+DEFINES
+CALLS
+INHERITS_FROM
+```
+
+JavaScript and TypeScript are currently detected by the scanner but do not yet have language-specific parsers.
+
+---
 
 ## Planned Capabilities
 
+As development progresses, the system is intended to support:
+
 - Repository ingestion and codebase understanding
 - Code-aware retrieval (RAG)
+- Exact and structural code retrieval
+- Semantic vector retrieval
+- Hybrid retrieval
 - AI-powered code review
 - Bug and root-cause analysis
 - Fix generation
@@ -20,194 +80,438 @@ This project is being developed as a practical Generative AI engineering project
 - Structured review reports
 - Support for multiple programming languages over time
 
-## Architecture
+---
 
-The planned workflow is:
+# Architecture
+
+## Current Architecture
+
+The current implementation focuses on deterministic repository intelligence:
 
 ```text
 Repository
-    ↓
+    |
+    v
+Repository Inspection
+    |
+    v
 Repository Scanner
-    ↓
-Code Index / Retrieval
-    ↓
-Review Agent
-    ↓
-Fix Agent
-    ↓
-Validation
-    ↓
-Review / Retry
-    ↓
-Final Report
+    |
+    v
+Language Detection
+    |
+    v
+Parser Registry
+    |
+    v
+Python AST Parser
+    |
+    v
+CodeArtifact[]
+    |
+    +-- SymbolIndex
+    |
+    +-- Relationship Analysis
+              |
+              v
+       CodeRelationship[]
 ```
 
-## Technology
+The current architecture deliberately establishes reliable repository understanding before introducing LLM-based reasoning.
 
-- Python
+## Target Architecture
+
+The completed system will extend repository intelligence with retrieval, agentic review, fix generation, and validation:
+
+```text
+Repository + Issue
+        |
+        v
+Repository Ingestion
+        |
+        v
+Repository Analysis
+        |
+        v
+Hybrid Retrieval
+   +---------+---------+
+   |         |         |
+   v         v         v
+ Exact   Structural  Semantic
+ Search    Search     Search
+   |         |         |
+   +---------+---------+
+             |
+             v
+        Review Agent
+             |
+             v
+          Fix Agent
+             |
+             v
+         Validation
+          /       \
+       PASS       FAIL
+        |           |
+        v           v
+ Final Report   Re-analysis
+                    |
+                    v
+                Fix Agent
+```
+
+The target workflow is designed around evidence-based review and validation before a fix is considered successful.
+
+---
+
+# Technology
+
+## Currently Implemented
+
+- Python 3.13+
 - FastAPI
-- LangGraph
-- LLM APIs
-- ChromaDB
-- Streamlit
+- Pydantic
+- Pydantic Settings
+- Uvicorn
 - pytest
 - Ruff
+- uv
+- Python `ast`
 
-## Development
+## Planned
 
-This project uses `uv` for Python environment and dependency management.
+The following technologies will be introduced only when their corresponding milestones are implemented:
 
-### Create the environment
+- LLM APIs
+- Embeddings
+- ChromaDB
+- LangGraph
+- Streamlit
+
+This keeps the current repository lightweight and ensures dependencies are added only when functionality actually requires them.
+
+---
+
+# Project Structure
+
+```text
+ai-code-reviewer-bug-fixing-agent/
+│
+├── app/
+│   ├── agents/                 # Future agent orchestration
+│   ├── api/                    # API layer
+│   ├── config/                 # Application configuration
+│   ├── ingestion/              # Repository intelligence
+│   ├── rag/                    # Future retrieval layer
+│   ├── tools/                  # Future agent tools
+│   └── validation/             # Future validation layer
+│
+├── tests/
+│   ├── test_health.py
+│   ├── test_repository.py
+│   ├── test_scanner.py
+│   ├── test_parser.py
+│   ├── test_pipeline.py
+│   ├── test_index.py
+│   └── test_relationships.py
+│
+├── examples/
+│   └── sample_project/
+│
+├── docs/
+│   ├── architecture.md
+│   └── evaluation.md
+│
+├── .github/
+│   └── workflows/
+│       └── ci.yml
+│
+├── .env.example
+├── .gitignore
+├── LICENSE
+├── pyproject.toml
+└── README.md
+```
+
+Some directories contain intentionally empty architectural placeholders for future milestones. Their presence does not mean that the corresponding functionality is currently implemented.
+
+---
+
+# Development
+
+This project uses [`uv`](https://docs.astral.sh/uv/) for Python environment and dependency management.
+
+## Create the Environment
 
 ```bash
 uv venv
 ```
 
-### Install dependencies
+## Install Dependencies
 
 ```bash
 uv sync
 ```
 
-### Run tests
+## Run Tests
 
 ```bash
 uv run pytest
 ```
 
-### Run linting
+## Run Linting
 
 ```bash
 uv run ruff check .
 ```
 
-### Run the API
+## Run the API
 
 ```bash
 uv run uvicorn app.main:app --reload
 ```
 
-The health endpoint is available at:
+Health endpoint:
 
 ```text
 GET /health
 ```
 
-## System Architecture
+---
 
-The AI Code Reviewer & Bug-Fixing Agent is designed as a modular agentic system that can ingest a software repository, understand its structure, retrieve relevant code, analyze issues, propose changes, and validate those changes.
+# Configuration
 
-### High-Level Flow
+Copy the example environment file:
 
-```text
-User
- │
- ▼
-Repository Input
- │
- ▼
-Repository Ingestion
- │
- ├── File Discovery
- ├── Language Detection
- └── Code Parsing
- │
- ▼
-Code Index
- │
- ├── Semantic Retrieval
- ├── Metadata Retrieval
- └── Code Context
- │
- ▼
-Review Agent
- │
- ▼
-Fix Agent
- │
- ▼
-Validation
- │
- ├── Static Analysis
- └── Automated Tests
- │
- ▼
-Validation Decision
- │
- ├── Passed ──► Final Report
- │
- └── Failed ──► Limited Agent Retry
+### macOS / Linux
+
+```bash
+cp .env.example .env
 ```
 
-## Design Principles
+### Windows PowerShell
 
-### 1. Modular architecture
-
-Repository ingestion, retrieval, agents, tools, and validation are separated so that each component can evolve independently.
-
-### 2. Structured agent state
-
-Agent nodes communicate through structured state rather than relying exclusively on free-form text.
-
-### 3. Evidence-based review
-
-Review findings should reference concrete repository artifacts such as files, functions, classes, and line ranges whenever possible.
-
-### 4. Validation before claiming success
-
-A generated fix should not automatically be considered correct. The system should attempt to validate proposed changes.
-
-### 5. Controlled execution
-
-Repository code is considered untrusted input. Test execution must be isolated and restricted rather than granting arbitrary host-level access.
-
-### 6. Extensibility
-
-Python is the initial target language because it provides a strong MVP path through its AST and pytest ecosystem. The ingestion layer is designed so additional languages can be introduced later.
-
-## CI Foundation
-
-Create `.github/workflows/ci.yml`:
-
-```yaml
-name: CI
-
-on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
-
-jobs:
-  quality:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Install uv
-        uses: astral-sh/setup-uv@v6
-        with:
-          enable-cache: true
-
-      - name: Set up Python
-        run: uv python install 3.13
-
-      - name: Install dependencies
-        run: uv sync --dev
-
-      - name: Run Ruff
-        run: uv run ruff check .
-
-      - name: Run tests
-        run: uv run pytest
+```powershell
+Copy-Item .env.example .env
 ```
 
-This gives the repository a basic automated quality gate from the beginning.
+The current configuration model includes settings for future LLM, embedding, vector-store, and agent functionality.
 
-## License
+Actual provider integrations will be introduced in later milestones.
+
+> **Important:** Never commit real API keys or other secrets to the repository.
+
+---
+
+# Development Roadmap
+
+## Milestone 1 — Foundation
+
+- Repository setup
+- Python environment
+- Configuration
+- FastAPI foundation
+- Testing
+- Ruff
+- CI
+- Initial architecture
+
+**Status: Complete**
+
+---
+
+## Milestone 2 — Repository Intelligence
+
+- Repository scanner
+- Language detection
+- Python AST parser
+- Code artifact model
+- Parser abstraction
+- Parser registry
+- Unified parsing pipeline
+- Symbol index
+- Code relationships
+
+**Status: Complete**
+
+---
+
+## Milestone 3 — Repository Knowledge & Retrieval
+
+### 3.1 Repository Analysis Model
+
+- Combine repository metadata
+- `CodeArtifact[]`
+- `CodeRelationship[]`
+- `SymbolIndex`
+- Unified `RepositoryAnalysis`
+
+### 3.2 Retrieval Interfaces
+
+- Common retriever abstraction
+- Exact symbol retrieval
+- Relationship retrieval
+- Retrieval result model
+
+### 3.3 Semantic Retrieval
+
+- Embedding integration
+- ChromaDB
+- Artifact indexing
+- Similarity search
+
+### 3.4 Hybrid Retrieval
+
+- Exact retrieval
+- Structural retrieval
+- Semantic retrieval
+- Ranking
+- Deduplication
+- Context-size controls
+
+### 3.5 Retrieval Evaluation
+
+- Representative repository queries
+- Retrieval precision/recall
+- Baseline evaluation
+
+**Status: Planned**
+
+---
+
+## Milestone 4 — Review Agent
+
+- LangGraph
+- Structured review state
+- Code analysis
+- Root-cause analysis
+- Severity
+- Confidence
+- Evidence and citations
+
+**Status: Planned**
+
+---
+
+## Milestone 5 — Bug-Fixing Agent
+
+- Patch generation
+- Safe file modification
+- Diff generation
+- Fix explanations
+
+**Status: Planned**
+
+---
+
+## Milestone 6 — Validation Loop
+
+- Test generation
+- Test execution
+- Result parsing
+- Fix → test → retry
+- Iteration limits
+
+**Status: Planned**
+
+---
+
+## Milestone 7 — UI, Deployment & Submission
+
+- Repository upload
+- Issue input
+- Review progress
+- Findings
+- Proposed diff
+- Test results
+- Final report
+- Deployment
+- Demo repository
+- Demo video
+- Submission materials
+
+**Status: Planned**
+
+---
+
+# Design Principles
+
+## Evidence-Based Review
+
+Future findings should reference concrete repository artifacts, files, symbols, and line ranges.
+
+## Deterministic Repository Intelligence
+
+Repository structure should be extracted deterministically wherever possible before involving an LLM.
+
+## Hybrid Retrieval
+
+Code retrieval should combine:
+
+- Exact symbol matching
+- Structural relationships
+- Semantic similarity
+
+No single retrieval strategy is expected to be sufficient for repository-level code understanding.
+
+## Validation Before Success
+
+A generated fix should not be considered successful until validation provides supporting evidence.
+
+## Controlled Execution
+
+Repository code is untrusted input. Future test execution will use controlled and restricted execution environments.
+
+## Human Oversight
+
+The system assists developers and should not silently modify production code.
+
+## Extensibility
+
+Python is the initial fully supported language. The parser abstraction is designed to accommodate additional languages without requiring a redesign of the overall workflow.
+
+---
+
+# CI
+
+The repository uses GitHub Actions to run:
+
+- Dependency installation
+- Ruff
+- pytest
+
+Every push to `main` and pull request targeting `main` is subject to the configured quality checks.
+
+The CI workflow provides a basic automated quality gate as the project evolves.
+
+---
+
+# Evaluation
+
+The project maintains an evaluation strategy alongside the architecture so that future retrieval, review, fixing, and validation capabilities can be measured against the deterministic repository-intelligence baseline.
+
+See [`docs/evaluation.md`](docs/evaluation.md) for:
+
+- Current baseline evaluation
+- Repository scanning and parsing evaluation
+- Symbol and relationship evaluation
+- Planned retrieval evaluation
+- Planned agent evaluation
+- Validation metrics
+- Initial evaluation dataset
+- MVP success criteria
+
+---
+
+# Documentation
+
+Additional project documentation:
+
+- [`docs/architecture.md`](docs/architecture.md) — Current and target system architecture
+- [`docs/evaluation.md`](docs/evaluation.md) — Evaluation strategy and success criteria
+
+---
+
+# License
 
 MIT
